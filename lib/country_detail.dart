@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:world_country/new_country.dart';
+import 'package:world_country/country.dart';
 
 class CountryDetail extends StatelessWidget {
   final Country _country;
