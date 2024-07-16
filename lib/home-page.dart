@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:world_country/country.dart';
 import 'package:world_country/country_detail.dart';
 
@@ -16,6 +17,7 @@ class _HomePageState extends State<HomePage> {
   final String _apiURL =
       'https://restcountries.com/v3.1/all?fields=name,population,flags,capital,region,languages,cca2';
   List<Country> allCountry = [];
+  List<String> _favoriteCounties = [];
 
   @override
   void initState() {
@@ -58,9 +60,16 @@ class _HomePageState extends State<HomePage> {
       leading: CircleAvatar(
         backgroundImage: NetworkImage(country.flags),
       ),
-      trailing: Icon(
-        Icons.favorite_border,
-        color: Colors.red,
+      trailing: IconButton(
+        icon: _favoriteCounties.contains(country.countryCode)
+            ? Icon(Icons.favorite, color: Colors.red)
+            : Icon(
+                Icons.favorite_border,
+                color: Colors.red,
+              ),
+        onPressed: () {
+          clickFavorite(country);
+        },
       ),
       onTap: () {
         gotoDetailPage(context, country);
@@ -87,5 +96,17 @@ class _HomePageState extends State<HomePage> {
       return CountryDetail(country);
     });
     Navigator.push(context, path);
+  }
+
+  void clickFavorite(Country _country) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (_favoriteCounties.contains(_country.countryCode)) {
+      _favoriteCounties.remove(_country.countryCode);
+    } else {
+      _favoriteCounties.add(_country.countryCode);
+    }
+
+    prefs.setStringList("favorite", _favoriteCounties);
+    setState(() {});
   }
 }
