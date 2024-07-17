@@ -16,8 +16,23 @@ class OrtakComponent extends StatefulWidget {
 class _OrtakComponentState extends State<OrtakComponent> {
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-        itemBuilder: _buildListItem, itemCount: widget.allCountry.length);
+    return widget.allCountry.isNotEmpty
+        ? ListView.builder(
+            itemBuilder: _buildListItem, itemCount: widget.allCountry.length)
+        : Row(
+            children: <Widget>[
+              Expanded(
+                child: Card(
+                  margin: EdgeInsets.only(left: 10, right: 10),
+                  color: Colors.grey,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Text("No Data", textAlign: TextAlign.center),
+                  ),
+                ),
+              ),
+            ],
+          );
   }
 
   Widget _buildListItem(BuildContext context, int index) {
