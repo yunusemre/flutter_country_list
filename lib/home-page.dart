@@ -2,9 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:world_country/components/list.dart';
 import 'package:world_country/country.dart';
-import 'package:world_country/country_detail.dart';
+import 'package:world_country/favorite_countries.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -30,51 +30,31 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: buildAppBar(),
+      appBar: buildAppBar(context),
       body: buildBody(),
     );
   }
 
-  AppBar buildAppBar() {
+  AppBar buildAppBar(BuildContext context) {
     return AppBar(
       title: Text('Home Page'),
       centerTitle: true,
+      actions: [
+        IconButton(
+            onPressed: () {
+              _gotoFavoriteCountiesPage(context);
+            },
+            icon: Icon(Icons.favorite, color: Colors.red))
+      ],
     );
   }
 
   Widget buildBody() {
     return allCountry.isNotEmpty
-        ? ListView.builder(
-            itemBuilder: _buildListItem, itemCount: allCountry.length)
+        ? OrtakComponent(allCountry, _favoriteCounties)
         : Center(
             child: CircularProgressIndicator(),
           );
-  }
-
-  Widget _buildListItem(BuildContext context, int index) {
-    Country country = allCountry[index];
-    return Card(
-        child: ListTile(
-      title: Text(country.name + " - " + country.countryCode),
-      subtitle: Text("Region: ${country.region}"),
-      leading: CircleAvatar(
-        backgroundImage: NetworkImage(country.flags),
-      ),
-      trailing: IconButton(
-        icon: _favoriteCounties.contains(country.countryCode)
-            ? Icon(Icons.favorite, color: Colors.red)
-            : Icon(
-                Icons.favorite_border,
-                color: Colors.red,
-              ),
-        onPressed: () {
-          clickFavorite(country);
-        },
-      ),
-      onTap: () {
-        gotoDetailPage(context, country);
-      },
-    ));
   }
 
   void getCountry() async {
@@ -91,22 +71,10 @@ class _HomePageState extends State<HomePage> {
     setState(() {});
   }
 
-  void gotoDetailPage(BuildContext context, Country country) async {
+  void _gotoFavoriteCountiesPage(BuildContext context) {
     MaterialPageRoute path = MaterialPageRoute(builder: (context) {
-      return CountryDetail(country);
+      return FavoriteCountries(allCountry, _favoriteCounties);
     });
     Navigator.push(context, path);
-  }
-
-  void clickFavorite(Country _country) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (_favoriteCounties.contains(_country.countryCode)) {
-      _favoriteCounties.remove(_country.countryCode);
-    } else {
-      _favoriteCounties.add(_country.countryCode);
-    }
-
-    prefs.setStringList("favorite", _favoriteCounties);
-    setState(() {});
   }
 }
